@@ -1206,13 +1206,21 @@ Return ONLY the JSON array. No preamble, no markdown fences.`;
       })
     });
 
+    let rawResponse;
+    try {
+      rawResponse = await response.text();
+    } catch(e) {
+      throw new Error("No response from proxy. HTTP status: " + response.status);
+    }
+    if (!rawResponse || rawResponse.trim() === "") {
+      throw new Error("Worker returned empty response. HTTP status: " + response.status);
+    }
     let data;
     try {
-      data = await response.json();
+      data = JSON.parse(rawResponse);
     } catch(e) {
-      throw new Error('Could not read response from proxy. Check your Worker is deployed correctly.');
+      throw new Error("Worker returned (status " + response.status + "): " + rawResponse.substring(0, 300));
     }
-
     if (data.error) {
       throw new Error(data.error.message || JSON.stringify(data.error));
     }
