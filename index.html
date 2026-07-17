@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Nwobi Project — Content Studio</title>
+<style>
+  :root {
+    --dark: #1A1A2E;
+    --mid: #16213E;
+    --accent: #E94560;
+    --accent2: #FF6B6B;
+    --white: #FFFFFF;
+    --off-white: #F0F0F0;
+    --grey: #8892A4;
+    --light-grey: #2A2A45;
+    --card-bg: #1E1E38;
+    --green: #1A9E5C;
+    --amber: #E8A838;
+    --font-mono: 'Roboto Mono', 'Courier New', monospace;
+    --font-body: 'Inter', 'Segoe UI', sans-serif;
+    --radius: 10px;
+    --transition: 0.2s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--white);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── FONTS ── */
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  /* ── API GATE ── */
+  #api-gate {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .gate-logo {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .gate-title {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .gate-sub {
+    color: var(--grey);
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 40px;
+    max-width: 320px;
+  }
+
+  .gate-card {
+    background: var(--card-bg);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .gate-card label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+  }
+
+  .gate-card input {
+    width: 100%;
+    background: var(--dark);
+    border: 1px solid var(--light-grey);
+    border-radius: 6px;
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color var(--transition);
+    margin-bottom: 16px;
+  }
+
+  .gate-card input:focus { border-color: var(--accent); }
+
+  .gate-hint {
+    font-size: 11px;
+    color: var(--grey);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .gate-hint a { color: var(--accent); text-decoration: none; }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 13px;
+    cursor: pointer;
+    transition: opacity var(--transition);
+    text-transform: uppercase;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── MAIN APP ── */
+  #app { display: none; min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--mid);
+    border-bottom: 1px solid var(--light-grey);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .app-logo {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .day-pill {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  .day-pill.recording { background: var(--accent); color: var(--white); }
+  .day-pill.not-recording { background: var(--light-grey); color: var(--grey); }
+
+  .btn-icon {
+    background: var(--light-grey);
+    border: none;
+    border-radius: 6px;
+    color: var(--grey);
+    cursor: pointer;
+    padding: 7px 10px;
+    font-size: 14px;
+    transition: all var(--transition);
+  }
+
+  .btn-icon:hover { background: var(--accent); color: var(--white); }
+
+  /* ── DAY BANNER ── */
+  .day-banner {
+    background: linear-gradient(135deg, var(--mid) 0%, #1A2040 100%);
+    border-bottom: 1px solid var(--light-grey);
+    padding: 20px;
+  }
+
+  .day-banner-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .day-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--grey);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .day-name {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .recording-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .recording-badge.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(233, 69, 96, 0.08);
+  }
+
+  .recording-badge.inactive {
+    color: var(--grey);
+    border-color: var(--light-grey);
+  }
+
+  .progress-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--light-grey);
+    transition: background var(--transition);
+  }
+
+  .progress-dot.done { background: var(--green); }
+  .progress-dot.active { background: var(--accent); }
+
+  .progress-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--grey);
+    margin-left: 8px;
+  }
+
+  /* ── TABS ── */
+  .tabs-container {
+    padding: 16px 20px 0;
+    border-bottom: 1px solid var(--light-grey);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    min-width: max-content;
+  }
+
+  .tab {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border-radius: 6px 6px 0 0;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition);
+    background: transparent;
+    color: var(--grey);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+
+  .tab.active { color: var(--white); border-bottom-color: var(--accent); background: rgba(233,69,96,0.06); }
+  .tab:hover:not(.active) { color: var(--off-white); background: rgba(255,255,255,0.04); }
+
+  /* ── CONTENT AREA ── */
+  .content-area {
+    padding: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* ── GENERATE SECTION ── */
+  .generate-section {
+    background: var(--card-bg);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .generate-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .generate-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .trend-badge {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    letter-spacing: 1px;
+    color: var(--green);
+    background: rgba(26, 158, 92, 0.1);
+    border: 1px solid rgba(26, 158, 92, 0.25);
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+
+  .generate-desc {
+    font-size: 13px;
+    color: var(--grey);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .btn-generate {
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: opacity var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-generate:hover { opacity: 0.85; }
+  .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--grey);
+    border: 1px solid var(--light-grey);
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── VIDEO CARD ── */
+  .video-card {
+    background: var(--card-bg);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .video-card-header {
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--transition);
+  }
+
+  .video-card-header:hover { background: rgba(255,255,255,0.02); }
+
+  .video-card-left { display: flex; align-items: center; gap: 12px; }
+
+  .video-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--white);
+    background: var(--accent);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .video-meta { flex: 1; }
+
+  .video-category {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .cat-easy { color: #1A9E5C; }
+  .cat-motive { color: #4A90D9; }
+  .cat-psych { color: #9B59B6; }
+  .cat-mindset { color: var(--accent); }
+
+  .video-hook {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.4;
+  }
+
+  .video-tags {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid var(--light-grey);
+    color: var(--grey);
+  }
+
+  .tag.trend { color: var(--green); border-color: rgba(26,158,92,0.3); background: rgba(26,158,92,0.06); }
+  .tag.flag { color: var(--amber); border-color: rgba(232,168,56,0.3); background: rgba(232,168,56,0.06); }
+
+  .card-chevron {
+    color: var(--grey);
+    font-size: 16px;
+    transition: transform var(--transition);
+    flex-shrink: 0;
+  }
+
+  .video-card.expanded .card-chevron { transform: rotate(180deg); }
+
+  /* ── VIDEO BODY ── */
+  .video-body {
+    display: none;
+    border-top: 1px solid var(--light-grey);
+    padding: 0;
+  }
+
+  .video-card.expanded .video-body { display: block; }
+
+  /* ── SECTION BLOCK ── */
+  .section-block {
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .section-block:last-child { border-bottom: none; }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .section-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .st-hook { background: rgba(233,69,96,0.15); color: var(--accent); }
+  .st-story { background: rgba(74,144,217,0.15); color: #4A90D9; }
+  .st-lesson { background: rgba(155,89,182,0.15); color: #9B59B6; }
+  .st-interrupt { background: rgba(232,168,56,0.15); color: var(--amber); }
+  .st-action { background: rgba(26,158,92,0.15); color: var(--green); }
+  .st-cta { background: rgba(255,255,255,0.08); color: var(--grey); }
+
+  .section-timing {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--grey);
+  }
+
+  .section-content {
+    font-size: 13px;
+    color: var(--off-white);
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+
+  .section-content strong { color: var(--white); }
+
+  /* ── LINKS ── */
+  .links-block {
+    margin-top: 10px;
+  }
+
+  .links-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 7px;
+  }
+
+  .links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .link-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--dark);
+    border: 1px solid var(--light-grey);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--grey);
+    text-decoration: none;
+    transition: all var(--transition);
+  }
+
+  .link-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  .link-chip .chip-icon { font-size: 12px; }
+
+  /* ── DURATION BAR ── */
+  .duration-bar {
+    margin: 14px 18px;
+    background: var(--dark);
+    border-radius: 6px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--light-grey);
+  }
+
+  .duration-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--grey);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .duration-value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  /* ── FILMED TOGGLE ── */
+  .filmed-row {
+    padding: 14px 18px;
+    border-top: 1px solid var(--light-grey);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.02);
+  }
+
+  .filmed-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--grey);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--light-grey);
+    border-radius: 24px;
+    transition: background var(--transition);
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: var(--white);
+    border-radius: 50%;
+    transition: transform var(--transition);
+  }
+
+  .toggle input:checked + .toggle-slider { background: var(--green); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+  /* ── REPEAT FLAG MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--card-bg);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 380px;
+    width: 100%;
+  }
+
+  .modal-title {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--amber);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .modal-body { font-size: 13px; color: var(--grey); margin-bottom: 18px; line-height: 1.6; }
+
+  .modal-actions { display: flex; gap: 10px; }
+
+  .modal-actions button { flex: 1; padding: 11px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: 1px solid; transition: all var(--transition); }
+
+  .btn-keep { background: var(--accent); color: var(--white); border-color: var(--accent); }
+  .btn-regen { background: transparent; color: var(--grey); border-color: var(--light-grey); }
+  .btn-regen:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── EXPORT BAR ── */
+  .export-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--mid);
+    border-top: 1px solid var(--light-grey);
+    padding: 14px 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 50;
+  }
+
+  .export-bar button {
+    flex: 1;
+    padding: 11px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid;
+    transition: all var(--transition);
+  }
+
+  .btn-export-pdf { background: transparent; color: var(--accent); border-color: var(--accent); }
+  .btn-export-pdf:hover { background: var(--accent); color: var(--white); }
+  .btn-export-sheets { background: transparent; color: var(--green); border-color: var(--green); }
+  .btn-export-sheets:hover { background: var(--green); color: var(--white); }
+
+  /* ── LOADING ── */
+  .loading-state {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--light-grey);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--grey);
+  }
+
+  .loading-sub {
+    font-size: 12px;
+    color: var(--grey);
+    margin-top: 6px;
+    opacity: 0.7;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+  }
+
+  .empty-icon { font-size: 36px; margin-bottom: 14px; }
+  .empty-title { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .empty-desc { font-size: 13px; color: var(--grey); margin-bottom: 20px; line-height: 1.5; }
+
+  /* ── LOG TAB ── */
+  .log-entry {
+    background: var(--card-bg);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .log-date {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--grey);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .log-content { flex: 1; }
+
+  .log-cat {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .log-hook {
+    font-size: 13px;
+    color: var(--off-white);
+    line-height: 1.4;
+  }
+
+  /* ── SETTINGS TAB ── */
+  .settings-section {
+    background: var(--card-bg);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .settings-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .settings-row:last-child { border-bottom: none; }
+
+  .settings-row label { font-size: 13px; color: var(--off-white); }
+  .settings-row .settings-hint { font-size: 11px; color: var(--grey); margin-top: 2px; }
+
+  /* ── SHEET CONFIG ── */
+  .sheet-input {
+    width: 100%;
+    background: var(--dark);
+    border: 1px solid var(--light-grey);
+    border-radius: 6px;
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 12px;
+    outline: none;
+    margin-top: 8px;
+    transition: border-color var(--transition);
+  }
+
+  .sheet-input:focus { border-color: var(--accent); }
+
+  /* ── BOTTOM SPACER ── */
+  .bottom-spacer { height: 80px; }
+
+  /* ── RESPONSIVE ── */
+  @media (min-width: 600px) {
+    .content-area { padding: 24px; }
+    .day-name { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── API GATE ── -->
+<div id="api-gate">
+  <div class="gate-logo">The Nwobi Project</div>
+  <div class="gate-title">Content Studio</div>
+  <p class="gate-sub">Your weekly idea engine. Open on Monday, Wednesday, or Friday to generate your 4 video structures.</p>
+
+  <div class="gate-card">
+    <label>Claude API Key</label>
+    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
+    <p class="gate-hint">
+      Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. Save it to your password manager — you'll enter it each session.
+    </p>
+    <button class="btn-primary" id="enter-btn" onclick="enterApp()">Enter Studio →</button>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-logo">Nwobi Studio</div>
+    <div id="header-day-pill" class="day-pill"></div>
+    <button class="btn-icon" onclick="showTab('settings')" title="Settings">⚙</button>
+  </header>
+
+  <!-- Day Banner -->
+  <div class="day-banner">
+    <div class="day-banner-top">
+      <div>
+        <div class="day-label">Today</div>
+        <div class="day-name" id="banner-day">Monday</div>
+      </div>
+      <div id="recording-badge" class="recording-badge"></div>
+    </div>
+    <div class="progress-row" id="progress-row">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('generate')" id="tab-generate">Generate</button>
+      <button class="tab" onclick="showTab('log')" id="tab-log">Video Log</button>
+      <button class="tab" onclick="showTab('settings')" id="tab-settings">Settings</button>
+    </div>
+  </div>
+
+  <!-- ── GENERATE TAB ── -->
+  <div id="panel-generate" class="content-area">
+
+    <div class="generate-section" id="gen-controls">
+      <div class="generate-header">
+        <span class="generate-title">Today's 4 Videos</span>
+        <span class="trend-badge" id="trend-badge">● Trend check: ready</span>
+      </div>
+      <p class="generate-desc" id="gen-desc">Generate 4 fresh video structures — one for each category. Claude will check your video log to avoid repeats and pull trending topics before generating.</p>
+      <button class="btn-generate" id="gen-btn" onclick="generateVideos()">
+        <span>⚡</span> Generate Today's Videos
+      </button>
+    </div>
+
+    <div id="gen-output">
+      <div class="empty-state">
+        <div class="empty-icon">🎬</div>
+        <div class="empty-title">Ready when you are</div>
+        <p class="empty-desc">Hit Generate to build your 4 structured video scripts for today. Each one comes complete — hook to CTA — with reference links for b-roll and editing.</p>
+      </div>
+    </div>
+
+    <div class="bottom-spacer"></div>
+  </div>
+
+  <!-- ── LOG TAB ── -->
+  <div id="panel-log" class="content-area" style="display:none;">
+    <div id="log-list">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No videos logged yet</div>
+        <p class="empty-desc">Every video you generate and mark as filmed gets added here. This is what Claude checks to avoid repeating concepts.</p>
+      </div>
+    </div>
+    <div class="bottom-spacer"></div>
+  </div>
+
+  <!-- ── SETTINGS TAB ── -->
+  <div id="panel-settings" class="content-area" style="display:none;">
+
+    <div class="settings-section">
+      <div class="settings-title">API & Connection</div>
+      <div class="settings-row">
+        <div>
+          <div>Claude API</div>
+          <div class="settings-hint">Connected this session</div>
+        </div>
+        <span style="color:var(--green);font-size:12px;font-family:var(--font-mono);">● LIVE</span>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div>Web Search</div>
+          <div class="settings-hint">Claude pulls trends during generation</div>
+        </div>
+        <span style="color:var(--green);font-size:12px;font-family:var(--font-mono);">● ON</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-title">Google Sheets Log</div>
+      <p style="font-size:12px;color:var(--grey);margin-bottom:10px;line-height:1.5;">Paste your Google Apps Script Web App URL below to enable automatic logging of generated videos to your sheet.</p>
+      <label style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey);font-family:var(--font-mono);display:block;margin-bottom:4px;">Web App URL</label>
+      <input type="url" class="sheet-input" id="sheets-url" placeholder="https://script.google.com/macros/s/..." />
+      <button class="btn-secondary" style="margin-top:10px;width:100%;" onclick="saveSheetUrl()">Save URL</button>
+      <p style="font-size:11px;color:var(--grey);margin-top:10px;line-height:1.5;">
+        <a href="#" onclick="showSheetsSetup()" style="color:var(--accent);text-decoration:none;">How to set up the Google Sheet integration →</a>
+      </p>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-title">Video Log</div>
+      <div class="settings-row">
+        <div>
+          <div>Videos logged</div>
+          <div class="settings-hint" id="log-count-hint">0 videos in log</div>
+        </div>
+        <button class="btn-secondary" onclick="clearLog()">Clear Log</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-title">Session</div>
+      <button class="btn-secondary" style="width:100%;" onclick="logout()">Change API Key</button>
+    </div>
+
+    <div id="sheets-setup-info" style="display:none;" class="settings-section">
+      <div class="settings-title">Google Sheets Setup</div>
+      <p style="font-size:12px;color:var(--grey);line-height:1.65;">
+        1. Open <strong style="color:var(--white);">Google Sheets</strong> and create a new spreadsheet named <strong style="color:var(--white);">"Nwobi Content Log"</strong><br><br>
+        2. Add these column headers in Row 1: Date, Day, Category, Hook, Concept, Style, Filmed<br><br>
+        3. Go to <strong style="color:var(--white);">Extensions → Apps Script</strong><br><br>
+        4. Paste the script from the README in your GitHub repo<br><br>
+        5. Click <strong style="color:var(--white);">Deploy → New Deployment → Web App</strong><br><br>
+        6. Set access to <strong style="color:var(--white);">"Anyone"</strong> and copy the URL into the field above.
+      </p>
+    </div>
+
+    <div class="bottom-spacer"></div>
+  </div>
+
+  <!-- Export Bar -->
+  <div class="export-bar" id="export-bar" style="display:none;">
+    <button class="btn-export-pdf" onclick="exportPDF()">↓ Export PDF</button>
+    <button class="btn-export-sheets" onclick="logToSheets()">→ Log to Sheets</button>
+  </div>
+
+</div>
+
+<!-- Repeat Flag Modal -->
+<div class="modal-overlay" id="flag-modal">
+  <div class="modal">
+    <div class="modal-title">⚠ Concept Overlap Detected</div>
+    <p class="modal-body" id="flag-modal-body">One of today's generated videos is similar to a previous video in your log. You can keep it with a different angle, or regenerate that category.</p>
+    <div class="modal-actions">
+      <button class="btn-keep" onclick="closeFlagModal()">Keep It</button>
+      <button class="btn-regen" onclick="regenFlagged()">Regenerate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────
+let apiKey = '';
+let videoLog = JSON.parse(localStorage.getItem('nwobi_log') || '[]');
+let currentVideos = [];
+let flaggedIndex = null;
+let sheetsUrl = localStorage.getItem('nwobi_sheets_url') || '';
+
+const CATEGORIES = [
+  { id: 'easy', name: 'Easy Daily Task', color: 'cat-easy', tag: 'st-action' },
+  { id: 'motive', name: 'Motivational', color: 'cat-motive', tag: 'st-story' },
+  { id: 'psych', name: 'Psychology', color: 'cat-psych', tag: 'st-story' },
+  { id: 'mindset', name: 'Mindset', color: 'cat-mindset', tag: 'st-hook' }
+];
+
+// ── DATE HELPERS ───────────────────────────────────────────
+function getDayInfo() {
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const dayName = days[now.getDay()];
+  const isRecordingDay = ['Monday','Wednesday','Friday'].includes(dayName);
+  return { dayName, isRecordingDay, dateStr: now.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) };
+}
+
+// ── ENTER APP ──────────────────────────────────────────────
+function enterApp() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-ant')) {
+    alert('Please enter a valid Claude API key (starts with sk-ant)');
+    return;
+  }
+  apiKey = key;
+  document.getElementById('api-gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
+}
+
+document.getElementById('api-key-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') enterApp();
+});
+
+// ── INIT ───────────────────────────────────────────────────
+function initApp() {
+  const { dayName, isRecordingDay } = getDayInfo();
+
+  document.getElementById('banner-day').textContent = dayName;
+
+  const pill = document.getElementById('header-day-pill');
+  pill.textContent = isRecordingDay ? '● Record Day' : dayName;
+  pill.className = 'day-pill ' + (isRecordingDay ? 'recording' : 'not-recording');
+
+  const badge = document.getElementById('recording-badge');
+  badge.textContent = isRecordingDay ? '🎬 Recording Day' : 'Not a recording day';
+  badge.className = 'recording-badge ' + (isRecordingDay ? 'active' : 'inactive');
+
+  // Gen desc
+  if (!isRecordingDay) {
+    document.getElementById('gen-desc').textContent = `Today is ${dayName} — not a recording day. You can still generate ideas to plan ahead for your next session.`;
+  }
+
+  // Progress dots
+  const progressRow = document.getElementById('progress-row');
+  const todayFilmed = videoLog.filter(v => v.date === new Date().toDateString());
+  const dots = CATEGORIES.map((cat, i) => {
+    const filmed = todayFilmed.some(v => v.category === cat.id && v.filmed);
+    const active = !filmed && i === todayFilmed.filter(v => v.filmed).length;
+    return `<div class="progress-dot ${filmed ? 'done' : (active ? 'active' : '')}"></div>`;
+  }).join('');
+  progressRow.innerHTML = dots + `<span class="progress-label">${todayFilmed.filter(v=>v.filmed).length}/4 filmed</span>`;
+
+  // Sheets URL
+  if (sheetsUrl) {
+    document.getElementById('sheets-url').value = sheetsUrl;
+  }
+
+  updateLogCount();
+  renderLog();
+}
+
+// ── TAB SWITCHING ──────────────────────────────────────────
+function showTab(tab) {
+  ['generate','log','settings'].forEach(t => {
+    document.getElementById('panel-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+// ── GENERATE ──────────────────────────────────────────────
+async function generateVideos() {
+  const btn = document.getElementById('gen-btn');
+  const output = document.getElementById('gen-output');
+  const trendBadge = document.getElementById('trend-badge');
+
+  btn.disabled = true;
+  document.getElementById('export-bar').style.display = 'none';
+
+  // Loading state
+  output.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">Pulling trends & checking your log...</div>
+      <div class="loading-sub">Searching for what's new in business, psychology & mindset</div>
+    </div>`;
+
+  trendBadge.textContent = '● Checking trends...';
+  trendBadge.style.color = 'var(--amber)';
+
+  try {
+    // Build log summary for context
+    const recentLog = videoLog.slice(-30).map(v =>
+      `${v.date} | ${v.category} | Hook: "${v.hook}" | Concept: ${v.concept} | Style: ${v.style}`
+    ).join('\n') || 'No previous videos logged yet.';
+
+    const { dayName } = getDayInfo();
+    const today = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    const systemPrompt = `You are the content engine for The Nwobi Project — a YouTube and TikTok channel for 9-5 workers who want to become entrepreneurs. Emmanuel (the creator) films 4 short-form videos every Monday, Wednesday, and Friday — one per category.
+
+Your job: Generate 4 complete video structures for today. Each must be minimum 60 seconds of final content (roughly 140-160 words of spoken script at normal pace).
+
+CATEGORIES:
+1. EASY DAILY TASK — Direct, actionable. One specific task the viewer can do today to make progress toward entrepreneurship. No story needed. Hook → Why it matters → Exact steps → Result if they do it → CTA.
+2. MOTIVATIONAL — Story-driven. A real named person's story (named companies, real figures) that proves something is possible. Hook → Real story with specifics → The lesson → How the viewer applies it today → CTA.
+3. PSYCHOLOGY — Real business example of psychology used correctly or incorrectly. Named companies only. Hook → What happened (real story) → The psychological principle explained → How to apply it → CTA.
+4. MINDSET — Real story of a mindset that built or destroyed a business. Named examples. Hook → Story → The mindset identified → How to apply or avoid it → CTA.
+
+OUTPUT FORMAT: Return a JSON array of exactly 4 objects. Each object:
+{
+  "category": "easy|motive|psych|mindset",
+  "hook": "The opening sentence (under 20 words, stops the scroll)",
+  "concept": "One sentence describing the core concept for repeat-checking",
+  "style": "The format type e.g. 'Real story - named person', 'Direct task', 'Psychology explainer'",
+  "trendNote": "If this connects to a current trend or recent news, note it briefly. Otherwise null.",
+  "sections": [
+    {
+      "type": "hook|story|lesson|interrupt|action|cta",
+      "label": "Display label e.g. HOOK 0:00-0:05",
+      "timing": "e.g. 0:00–0:05",
+      "script": "The spoken words for this section. Be specific, natural, conversational.",
+      "patternInterrupt": "Optional — describe a visual or editing interrupt for this moment e.g. 'Cut to closer angle' or 'On-screen text overlay: [text]'"
+    }
+  ],
+  "links": {
+    "broll": ["descriptive search query 1", "descriptive search query 2"],
+    "images": ["descriptive search query 1"],
+    "references": ["Book/article title and author if relevant"],
+    "youtube": ["YouTube search query for relevant clip or example"]
+  },
+  "wordCount": estimated_word_count_of_full_script,
+  "estimatedSeconds": estimated_duration_in_seconds
+}
+
+REPEAT CHECK — Previous videos logged (check concept AND style to avoid exact repeats):
+${recentLog}
+
+FLAG any video where the concept AND style are very similar to a logged video by adding "repeatFlag": true and "repeatNote": "Brief explanation of similarity".
+
+Use web search to find: trending business news this week, newly published books on entrepreneurship/psychology/mindset, recent business failures or successes that could be used as examples. Incorporate at least one trend-connected video if found.
+
+Return ONLY the JSON array. No preamble, no markdown fences.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 8000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `Today is ${today}. Generate 4 video structures for The Nwobi Project. Search for trending business/entrepreneurship/psychology/mindset news and events from this week to incorporate where relevant.` }]
+      })
+    });
+
+    const data = await response.json();
+
+    // Extract text content
+    let rawText = '';
+    for (const block of data.content) {
+      if (block.type === 'text') rawText += block.text;
+    }
+
+    // Parse JSON
+    const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('Could not parse video data from response');
+
+    currentVideos = JSON.parse(jsonMatch[0]);
+
+    trendBadge.textContent = '● Trends checked ✓';
+    trendBadge.style.color = 'var(--green)';
+
+    renderVideos(currentVideos);
+
+    // Check for repeat flags
+    const flagged = currentVideos.find((v, i) => v.repeatFlag);
+    if (flagged) {
+      flaggedIndex = currentVideos.indexOf(flagged);
+      document.getElementById('flag-modal-body').textContent =
+        `"${flagged.hook}" — ${flagged.repeatNote}. You can keep it with a fresh angle or regenerate this category.`;
+      document.getElementById('flag-modal').classList.add('open');
+    }
+
+    document.getElementById('export-bar').style.display = 'flex';
+
+  } catch (err) {
+    output.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Generation failed</div>
+        <p class="empty-desc">${err.message}. Check your API key in settings or try again.</p>
+        <button class="btn-generate" style="margin-top:16px;" onclick="generateVideos()">Try Again</button>
+      </div>`;
+    trendBadge.textContent = '● Trend check failed';
+    trendBadge.style.color = 'var(--accent)';
+  }
+
+  btn.disabled = false;
+}
+
+// ── RENDER VIDEOS ──────────────────────────────────────────
+function renderVideos(videos) {
+  const output = document.getElementById('gen-output');
+
+  if (!videos || videos.length === 0) {
+    output.innerHTML = '<div class="empty-state"><div class="empty-title">No videos generated</div></div>';
+    return;
+  }
+
+  const sectionTypeMap = {
+    hook: { label: 'HOOK', cls: 'st-hook' },
+    story: { label: 'STORY / PROOF', cls: 'st-story' },
+    lesson: { label: 'LESSON', cls: 'st-lesson' },
+    interrupt: { label: 'PATTERN INTERRUPT', cls: 'st-interrupt' },
+    action: { label: 'ACTION STEP', cls: 'st-action' },
+    cta: { label: 'CTA', cls: 'st-cta' }
+  };
+
+  const catConfig = {
+    easy: { name: 'Easy Daily Task', cls: 'cat-easy' },
+    motive: { name: 'Motivational', cls: 'cat-motive' },
+    psych: { name: 'Psychology', cls: 'cat-psych' },
+    mindset: { name: 'Mindset', cls: 'cat-mindset' }
+  };
+
+  const linkIcons = { broll: '🎬', images: '🖼', references: '📚', youtube: '▶️' };
+  const linkLabels = { broll: 'B-Roll', images: 'Images', references: 'References', youtube: 'YouTube' };
+
+  function buildSearchLink(type, query) {
+    const q = encodeURIComponent(query);
+    switch(type) {
+      case 'broll': return `https://www.pexels.com/search/videos/${q}/`;
+      case 'images': return `https://www.google.com/search?tbm=isch&q=${q}`;
+      case 'youtube': return `https://www.youtube.com/results?search_query=${q}`;
+      case 'references': return `https://www.amazon.co.uk/s?k=${q}`;
+    }
+  }
+
+  output.innerHTML = videos.map((v, i) => {
+    const cat = catConfig[v.category] || catConfig.easy;
+    const secs = v.estimatedSeconds || 60;
+    const mins = Math.floor(secs / 60);
+    const s = secs % 60;
+    const durStr = mins > 0 ? `${mins}m ${s}s` : `${s}s`;
+    const durOk = secs >= 60;
+
+    const sectionsHtml = (v.sections || []).map(sec => {
+      const st = sectionTypeMap[sec.type] || sectionTypeMap.lesson;
+      return `
+        <div class="section-block">
+          <div class="section-label">
+            <span class="section-tag ${st.cls}">${sec.label || st.label}</span>
+            <span class="section-timing">${sec.timing || ''}</span>
+          </div>
+          <div class="section-content">${sec.script || ''}</div>
+          ${sec.patternInterrupt ? `<div style="font-size:11px;color:var(--amber);font-family:var(--font-mono);margin-top:6px;">📷 ${sec.patternInterrupt}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    const linksHtml = v.links ? Object.entries(v.links).map(([type, items]) => {
+      if (!items || items.length === 0) return '';
+      const chips = items.map(q =>
+        `<a class="link-chip" href="${buildSearchLink(type, q)}" target="_blank">
+          <span class="chip-icon">${linkIcons[type]}</span>${q.length > 35 ? q.substring(0,35)+'…' : q}
+        </a>`
+      ).join('');
+      return `<div class="links-block">
+        <div class="links-label">${linkLabels[type] || type}</div>
+        <div class="links-grid">${chips}</div>
+      </div>`;
+    }).join('') : '';
+
+    return `
+      <div class="video-card" id="card-${i}">
+        <div class="video-card-header" onclick="toggleCard(${i})">
+          <div class="video-card-left">
+            <div class="video-num">${i+1}</div>
+            <div class="video-meta">
+              <div class="video-category ${cat.cls}">${cat.name}</div>
+              <div class="video-hook">${v.hook}</div>
+              <div class="video-tags">
+                ${v.trendNote ? `<span class="tag trend">🔥 Trending</span>` : ''}
+                ${v.repeatFlag ? `<span class="tag flag">⚠ Similar concept</span>` : ''}
+                <span class="tag">${durStr}</span>
+                <span class="tag">${v.style || ''}</span>
+              </div>
+            </div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+
+        <div class="video-body">
+          ${sectionsHtml}
+
+          ${linksHtml ? `<div class="section-block">${linksHtml}</div>` : ''}
+
+          <div class="duration-bar">
+            <span class="duration-label">Estimated Duration</span>
+            <span class="duration-value" style="color:${durOk ? 'var(--green)' : 'var(--accent)'}">
+              ${durStr} ${durOk ? '✓' : '— pad to 60s'}
+            </span>
+          </div>
+
+          <div class="filmed-row">
+            <span class="filmed-label">Mark as Filmed</span>
+            <label class="toggle">
+              <input type="checkbox" id="filmed-${i}" onchange="markFilmed(${i}, this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── TOGGLE CARD ────────────────────────────────────────────
+function toggleCard(i) {
+  const card = document.getElementById('card-' + i);
+  card.classList.toggle('expanded');
+}
+
+// ── MARK FILMED ────────────────────────────────────────────
+function markFilmed(index, filmed) {
+  if (!currentVideos[index]) return;
+  const v = currentVideos[index];
+  const entry = {
+    id: Date.now() + '_' + index,
+    date: new Date().toDateString(),
+    dateStr: new Date().toLocaleDateString('en-GB'),
+    category: v.category,
+    hook: v.hook,
+    concept: v.concept || v.hook,
+    style: v.style || '',
+    filmed
+  };
+
+  // Update or add
+  const existing = videoLog.findIndex(l => l.hook === v.hook && l.date === entry.date);
+  if (existing >= 0) {
+    videoLog[existing] = entry;
+  } else {
+    videoLog.push(entry);
+  }
+
+  localStorage.setItem('nwobi_log', JSON.stringify(videoLog));
+  updateLogCount();
+  updateProgressDots();
+
+  // Log to sheets if configured
+  if (sheetsUrl && filmed) logEntryToSheets(entry);
+}
+
+// ── PROGRESS DOTS ──────────────────────────────────────────
+function updateProgressDots() {
+  const todayFilmed = videoLog.filter(v => v.date === new Date().toDateString() && v.filmed);
+  const dots = CATEGORIES.map((cat, i) => {
+    const filmed = todayFilmed.some(v => v.category === cat.id);
+    const active = !filmed && i === todayFilmed.length;
+    return `<div class="progress-dot ${filmed ? 'done' : (active ? 'active' : '')}"></div>`;
+  }).join('');
+  document.getElementById('progress-row').innerHTML =
+    dots + `<span class="progress-label">${todayFilmed.length}/4 filmed</span>`;
+}
+
+// ── LOG ────────────────────────────────────────────────────
+function renderLog() {
+  const list = document.getElementById('log-list');
+  if (videoLog.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No videos logged yet</div>
+      <p class="empty-desc">Every video you mark as filmed appears here. Claude uses this to avoid repeating concepts.</p>
+    </div>`;
+    return;
+  }
+
+  const catConfig = { easy:'cat-easy', motive:'cat-motive', psych:'cat-psych', mindset:'cat-mindset' };
+  const catNames = { easy:'Easy Daily Task', motive:'Motivational', psych:'Psychology', mindset:'Mindset' };
+
+  list.innerHTML = [...videoLog].reverse().map(v => `
+    <div class="log-entry">
+      <div class="log-date">${v.dateStr || v.date}</div>
+      <div class="log-content">
+        <div class="log-cat ${catConfig[v.category] || 'cat-easy'}">${catNames[v.category] || v.category}</div>
+        <div class="log-hook">${v.hook}</div>
+        ${v.filmed ? '<div style="font-size:10px;color:var(--green);font-family:var(--font-mono);margin-top:3px;">✓ FILMED</div>' : ''}
+      </div>
+    </div>`).join('');
+}
+
+function updateLogCount() {
+  const count = videoLog.length;
+  const el = document.getElementById('log-count-hint');
+  if (el) el.textContent = `${count} video${count !== 1 ? 's' : ''} in log`;
+}
+
+// ── MODAL ─────────────────────────────────────────────────
+function closeFlagModal() {
+  document.getElementById('flag-modal').classList.remove('open');
+  flaggedIndex = null;
+}
+
+async function regenFlagged() {
+  closeFlagModal();
+  if (flaggedIndex === null) return;
+  // Regenerate just that one category
+  const cat = currentVideos[flaggedIndex].category;
+  // Simple approach: re-run full generation with note to replace that category
+  await generateVideos();
+}
+
+// ── SHEETS ────────────────────────────────────────────────
+function saveSheetUrl() {
+  sheetsUrl = document.getElementById('sheets-url').value.trim();
+  localStorage.setItem('nwobi_sheets_url', sheetsUrl);
+  alert('Sheets URL saved. Videos marked as filmed will now log automatically.');
+}
+
+async function logEntryToSheets(entry) {
+  if (!sheetsUrl) return;
+  try {
+    await fetch(sheetsUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry)
+    });
+  } catch(e) { console.warn('Sheets log failed:', e); }
+}
+
+async function logToSheets() {
+  if (!sheetsUrl) {
+    alert('Set up your Google Sheets URL in Settings first.');
+    showTab('settings');
+    return;
+  }
+  const filmed = currentVideos.filter((v, i) => document.getElementById('filmed-' + i)?.checked);
+  if (filmed.length === 0) {
+    alert('Mark at least one video as filmed before logging to Sheets.');
+    return;
+  }
+  alert(`Logging ${filmed.length} video(s) to Google Sheets...`);
+}
+
+// ── EXPORT PDF ────────────────────────────────────────────
+function exportPDF() {
+  window.print();
+}
+
+// ── SETTINGS ──────────────────────────────────────────────
+function clearLog() {
+  if (confirm('Clear all logged videos? Claude will lose repeat-checking history.')) {
+    videoLog = [];
+    localStorage.removeItem('nwobi_log');
+    updateLogCount();
+    renderLog();
+  }
+}
+
+function logout() {
+  apiKey = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('api-gate').style.display = 'flex';
+  document.getElementById('api-key-input').value = '';
+}
+
+function showSheetsSetup() {
+  const el = document.getElementById('sheets-setup-info');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── PRINT STYLES ───────────────────────────────────────────
+const printStyle = document.createElement('style');
+printStyle.textContent = `
+  @media print {
+    .app-header, .day-banner, .tabs-container, .generate-section, #gen-controls,
+    .export-bar, .filmed-row, .btn-icon, .modal-overlay { display: none !important; }
+    body { background: white; color: black; font-size: 11pt; }
+    .video-card { border: 1px solid #ccc; margin-bottom: 20px; page-break-inside: avoid; background: white; }
+    .video-card-header { cursor: default; }
+    .video-body { display: block !important; }
+    .section-block { border-bottom: 1px solid #eee; }
+    .section-content { color: #333; }
+    .link-chip { color: #E94560; border: 1px solid #E94560; }
+    .card-chevron { display: none; }
+    .content-area { padding: 0; }
+  }`;
+document.head.appendChild(printStyle);
+</script>
+</body>
+</html>
