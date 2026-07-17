@@ -1056,8 +1056,8 @@ function getDayInfo() {
 // ── ENTER APP ──────────────────────────────────────────────
 function enterApp() {
   const key = document.getElementById('api-key-input').value.trim();
-  if (!key.startsWith('sk-ant')) {
-    alert('Please enter a valid Claude API key (starts with sk-ant)');
+  if (!key || key.length < 10) {
+    alert('Please enter your Claude API key.');
     return;
   }
   apiKey = key;
@@ -1190,7 +1190,7 @@ Use web search to find: trending business news this week, newly published books 
 
 Return ONLY the JSON array. No preamble, no markdown fences.`;
 
-    const response = await fetch('https://nwobi-proxy.emmnebu.workers.dev/ {
+    const response = await fetch('https://nwobi-proxy.emmnebu.workers.dev', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1206,7 +1206,20 @@ Return ONLY the JSON array. No preamble, no markdown fences.`;
       })
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch(e) {
+      throw new Error('Could not read response from proxy. Check your Worker is deployed correctly.');
+    }
+
+    if (data.error) {
+      throw new Error(data.error.message || JSON.stringify(data.error));
+    }
+
+    if (!data.content) {
+      throw new Error('Unexpected response: ' + JSON.stringify(data).substring(0, 200));
+    }
 
     // Extract text content
     let rawText = '';
