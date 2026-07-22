@@ -515,6 +515,9 @@
   .st-interrupt { background: rgba(232,168,56,0.15); color: var(--amber); }
   .st-action { background: rgba(26,158,92,0.15); color: var(--green); }
   .st-cta { background: rgba(255,255,255,0.08); color: var(--grey); }
+  .st-opinion { background: rgba(233,69,96,0.1); color: #FF8C69; border: 1px solid rgba(233,69,96,0.3); }
+  .st-validation { background: rgba(26,158,92,0.1); color: #4DD9A0; border: 1px solid rgba(26,158,92,0.3); }
+  .st-standout { background: rgba(232,168,56,0.1); color: #FFD700; border: 1px solid rgba(232,168,56,0.3); }
 
   .section-timing {
     font-family: var(--font-mono);
@@ -1033,7 +1036,7 @@
 // ── STATE ──────────────────────────────────────────────────
 let apiKey = '';
 let videoLog = JSON.parse(localStorage.getItem('nwobi_log') || '[]');
-let currentVideos = [];
+let currentVideos = JSON.parse(localStorage.getItem("nwobi_current_videos") || "[]");
 let flaggedIndex = null;
 let sheetsUrl = localStorage.getItem('nwobi_sheets_url') || '';
 
@@ -1106,6 +1109,33 @@ function initApp() {
 
   updateLogCount();
   renderLog();
+
+  // Restore previously generated videos if they exist
+  const savedDate = localStorage.getItem('nwobi_current_date');
+  const today = new Date().toDateString();
+  if (currentVideos && currentVideos.length > 0) {
+    const isToday = savedDate === today;
+    const label = isToday ? 'Today\'s videos restored ✓' : `Videos from ${savedDate || 'previous session'}`;
+    document.getElementById('trend-badge').textContent = '● ' + label;
+    document.getElementById('trend-badge').style.color = isToday ? 'var(--green)' : 'var(--amber)';
+    renderVideos(currentVideos);
+    document.getElementById('export-bar').style.display = 'flex';
+
+    // Restore filmed toggles
+    currentVideos.forEach((v, i) => {
+      const logEntry = videoLog.find(l => l.hook === v.hook && l.date === today);
+      if (logEntry && logEntry.filmed) {
+        setTimeout(() => {
+          const toggle = document.getElementById('filmed-' + i);
+          if (toggle) toggle.checked = true;
+        }, 100);
+      }
+    });
+
+    if (!isToday) {
+      document.getElementById('gen-desc').textContent = 'These are from a previous session. Hit Generate to get fresh ideas for today.';
+    }
+  }
 }
 
 // ── TAB SWITCHING ──────────────────────────────────────────
@@ -1150,10 +1180,31 @@ async function generateVideos() {
 Your job: Generate 4 complete video structures for today. Each must be minimum 60 seconds of final content (roughly 140-160 words of spoken script at normal pace).
 
 CATEGORIES:
-1. EASY DAILY TASK — Direct, actionable. One specific task the viewer can do today to make progress toward entrepreneurship. No story needed. Hook → Why it matters → Exact steps → Result if they do it → CTA.
-2. MOTIVATIONAL — Story-driven. A real named person's story (named companies, real figures) that proves something is possible. Hook → Real story with specifics → The lesson → How the viewer applies it today → CTA.
-3. PSYCHOLOGY — Real business example of psychology used correctly or incorrectly. Named companies only. Hook → What happened (real story) → The psychological principle explained → How to apply it → CTA.
-4. MINDSET — Real story of a mindset that built or destroyed a business. Named examples. Hook → Story → The mindset identified → How to apply or avoid it → CTA.
+1. EASY DAILY TASK — Direct, actionable. One specific task the viewer can do today to make progress toward entrepreneurship. No story needed. Hook → Why it matters → Exact steps → Result if they do it → Opinion Moment → Validation Challenge → Stand Out Reminder → CTA.
+2. MOTIVATIONAL — Story-driven. A real named person's story (named companies, real figures) that proves something is possible. Hook → Real story with specifics → The lesson → How the viewer applies it today → Opinion Moment → Validation Challenge → Stand Out Reminder → CTA.
+3. PSYCHOLOGY — Real business example of psychology used correctly or incorrectly. Named companies only. Hook → What happened (real story) → The psychological principle explained → How to apply it → Opinion Moment → Validation Challenge → Stand Out Reminder → CTA.
+4. MINDSET — Real story of a mindset that built or destroyed a business. Named examples. Hook → Story → The mindset identified → How to apply or avoid it → Opinion Moment → Validation Challenge → Stand Out Reminder → CTA.
+
+MANDATORY SECTIONS — Every video must include all three of these in addition to the core structure:
+
+1. OPINION MOMENT (type: "opinion")
+This is the comment driver. Emmanuel delivers a strong, opinionated personal take on the story or lesson — not a summary, a genuine stance that people will either strongly agree or strongly disagree with. It must be direct, slightly provocative, and invite a response. Write the full scripted example so Emmanuel knows exactly what this sounds like.
+Example for a psychology video about anchoring: "And here is my honest take — most people complain about being manipulated by pricing, but they never stop to learn how it works. The second you understand it, it stops working on you and starts working FOR you. That is the difference between a consumer and an entrepreneur."
+Example for a motivational video about rejection: "217 rejections. Most people quit after 3. And that is not a judgment — that is just the truth. The gap between people who build something and people who talk about building something is almost always just this: one of them kept going when it stopped being comfortable."
+The script for this section must be written in full, natural, conversational language. It must end with a direct question or provocation that invites disagreement or agreement — something the viewer feels compelled to respond to.
+
+2. VALIDATION CHALLENGE (type: "validation")
+This is the share driver. Emmanuel gives the viewer a specific social action that involves another person — either sending the video to someone, asking a friend or stranger to validate an idea, or taking the lesson to someone in their life. The framing must make the viewer feel that completing this step requires involving someone else, which naturally drives shares and sends.
+Example: "Here is your challenge — send this video to one person in your life who keeps talking about starting something but hasn't yet. Not to lecture them. Just so they know they are not the only one. If that person is you, send it to yourself and watch it again tomorrow."
+Example: "Go on TikTok right now and find a stranger in the comments of any business video. Ask them one question: what is stopping you from starting? Then come back and tell me what they said. I genuinely want to know."
+Example: "Show this to one person today — a friend, a colleague, anyone — and ask them: does this sound like me? Their answer will tell you something about yourself that you might need to hear."
+The validation challenge must feel natural, not forced. It should connect directly to the topic of the video.
+
+3. STAND OUT REMINDER (type: "standout")
+This is a short moment — 5 to 10 seconds — where Emmanuel directly addresses the viewer's fear of looking different, being judged, or standing out from their peers by pursuing entrepreneurship. It must be warm, direct, and grounded in the reality that their current audience (9-5 workers) often feel embarrassed or exposed when they start taking business seriously around people who are not.
+Example: "And one more thing — if people around you think this is weird, good. The people who changed things always looked a little strange before they looked successful. Do not shrink yourself to fit into a room you are trying to leave."
+Example: "Someone watching this right now is embarrassed to tell people they want to start a business. Stop that. The only people who never get judged are the ones who never try anything. Be okay with standing out — it means you are moving."
+Example: "Looking different from the people around you is not a problem to solve. It is a sign you are heading somewhere they are not yet. Own it."
 
 OUTPUT FORMAT: Return a JSON array of exactly 4 objects. Each object:
 {
@@ -1164,10 +1215,10 @@ OUTPUT FORMAT: Return a JSON array of exactly 4 objects. Each object:
   "trendNote": "If this connects to a current trend or recent news, note it briefly. Otherwise null.",
   "sections": [
     {
-      "type": "hook|story|lesson|interrupt|action|cta",
+      "type": "hook|story|lesson|interrupt|action|opinion|validation|standout|cta",
       "label": "Display label e.g. HOOK 0:00-0:05",
       "timing": "e.g. 0:00–0:05",
-      "script": "The spoken words for this section. Be specific, natural, conversational.",
+      "script": "The spoken words for this section. Be specific, natural, conversational. For opinion, validation, and standout sections this must be fully written out — not a description of what to say but the actual words.",
       "patternInterrupt": "Optional — describe a visual or editing interrupt for this moment e.g. 'Cut to closer angle' or 'On-screen text overlay: [text]'"
     }
   ],
@@ -1240,6 +1291,8 @@ Return ONLY the JSON array. No preamble, no markdown fences.`;
     if (!jsonMatch) throw new Error('Could not parse video data from response');
 
     currentVideos = JSON.parse(jsonMatch[0]);
+    localStorage.setItem('nwobi_current_videos', JSON.stringify(currentVideos));
+    localStorage.setItem('nwobi_current_date', new Date().toDateString());
 
     trendBadge.textContent = '● Trends checked ✓';
     trendBadge.style.color = 'var(--green)';
@@ -1287,7 +1340,10 @@ function renderVideos(videos) {
     lesson: { label: 'LESSON', cls: 'st-lesson' },
     interrupt: { label: 'PATTERN INTERRUPT', cls: 'st-interrupt' },
     action: { label: 'ACTION STEP', cls: 'st-action' },
-    cta: { label: 'CTA', cls: 'st-cta' }
+    cta: { label: 'CTA', cls: 'st-cta' },
+    opinion: { label: '💬 OPINION MOMENT — Say this to drive comments', cls: 'st-opinion' },
+    validation: { label: '🔁 VALIDATION CHALLENGE — Say this to drive shares', cls: 'st-validation' },
+    standout: { label: '⭐ STAND OUT REMINDER — Say this to normalise being different', cls: 'st-standout' }
   };
 
   const catConfig = {
