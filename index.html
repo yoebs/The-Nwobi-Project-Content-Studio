@@ -1549,13 +1549,26 @@ function saveSheetUrl() {
 async function logEntryToSheets(entry) {
   if (!sheetsUrl) return;
   try {
-    await fetch(sheetsUrl, {
+    const response = await fetch(sheetsUrl, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry)
     });
-  } catch(e) { console.warn('Sheets log failed:', e); }
+    const result = await response.json();
+    if (result.error) {
+      console.warn('Sheets log error:', result.error);
+    }
+  } catch(e) {
+    // Google Apps Script redirects POST requests — use the redirect URL
+    try {
+      await fetch(sheetsUrl, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(entry)
+      });
+    } catch(e2) { console.warn('Sheets log failed:', e2); }
+  }
 }
 
 async function logToSheets() {
@@ -1569,7 +1582,18 @@ async function logToSheets() {
     alert('Mark at least one video as filmed before logging to Sheets.');
     return;
   }
-  alert(`Logging ${filmed.length} video(s) to Google Sheets...`);
+  Promise.all(filmed.map(v => logEntryToSheets({
+    dateStr: new Date().toLocaleDateString('en-GB'),
+    category: v.category,
+    hook: v.hook,
+    concept: v.concept,
+    style: v.style,
+    filmed: true
+  }))).then(() => {
+    alert(`✓ ${filmed.length} video(s) logged to Google Sheets.`);
+  }).catch(() => {
+    alert('Some entries may not have logged. Check your Sheets URL in Settings.');
+  });
 }
 
 // ── EXPORT PDF ────────────────────────────────────────────
